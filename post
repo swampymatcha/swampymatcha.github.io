@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>独立食坊 Gallery</title>
+<style>
+* {margin:0;padding:0;box-sizing:border-box;}
+body {
+    background-color:#E0E8E0;
+    background-image: radial-gradient(#FFB5B5 3px, transparent 3px);
+    background-size:40px 40px;
+    font-family:monospace;
+    padding:30px 20px;
+    min-height:100vh;
+}
+.container {
+    max-width:1200px;
+    margin:0 auto;
+    backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.3);
+    border-radius:30px;
+    border:1px solid rgba(255,181,181,0.4);
+    padding:35px 30px;
+}
+h1{text-align:center;color:#2A2A2A;margin-bottom:8px;font-size:2rem;}
+.subtitle{text-align:center;color:#FF9F9F;margin-bottom:35px;font-size:0.85rem;}
+.post-form{
+    background: rgba(255,255,255,0.3);
+    border-radius:24px;
+    padding:25px;
+    margin-bottom:40px;
+    border:1px solid rgba(255,181,181,0.3);
+}
+.post-form input, .post-form textarea{
+    width:100%;
+    padding:12px 14px;
+    margin-bottom:15px;
+    border-radius:16px;
+    border:1px solid rgba(255,181,181,0.5);
+    background: rgba(255,255,255,0.6);
+    font-family: monospace;
+    font-size:0.9rem;
+}
+.name-row{display:flex;gap:15px;margin-bottom:0;}
+.name-row input{margin-bottom:0;}
+.file-label{display:block;margin:15px 0;padding:12px;background: rgba(255,255,255,0.4);border-radius:16px;border:1px dashed rgba(255,181,181,0.6);text-align:center;cursor:pointer;}
+#postImage{display:none;}
+.publish-btn{background: rgba(255,159,159,0.85);border:none;padding:12px 24px;border-radius:40px;cursor:pointer;font-family:monospace;font-size:0.9rem;font-weight:bold;width:100%;}
+.publish-btn:hover{background:#FF9F9F;box-shadow:0 0 15px rgba(255,181,181,0.5);}
+.feed-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.post-card{background: rgba(255,255,255,0.3);border-radius:20px;overflow:hidden;border:1px solid rgba(255,181,181,0.3);transition:all 0.3s ease;}
+.post-card:hover{transform:translateY(-4px);background: rgba(255,255,255,0.45);}
+.post-card-image{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;}
+.post-card-content{padding:12px;}
+.post-card-header{display:flex;justify-content:space-between;margin-bottom:6px;}
+.post-card-name{font-size:0.7rem;font-weight:bold;color:#FF6B6B;}
+.post-card-date{font-size:0.6rem;color:#888;}
+.post-card-title{font-size:0.85rem;font-weight:bold;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.post-card-desc{font-size:0.7rem;color:#555;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.post-card-actions{display:flex;gap:15px;padding-top:8px;border-top:1px solid rgba(255,181,181,0.3);}
+.like-btn,.comment-btn{background:transparent;border:none;padding:4px 8px;font-size:0.7rem;cursor:pointer;border-radius:20px;}
+.like-btn:hover,.comment-btn:hover{background: rgba(255,159,159,0.3);}
+.comment-section{margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,181,181,0.3);}
+.comment-list{max-height:100px;overflow-y:auto;margin-bottom:8px;}
+.comment-item{font-size:0.6rem;padding:4px 0;color:#555;}
+.comment-item strong{color:#FF9F9F;}
+.comment-input-area{display:flex;gap:6px;}
+.comment-input-area input:first-child{width:55px;padding:5px;font-size:0.6rem;border-radius:12px;border:1px solid rgba(255,181,181,0.5);background: rgba(255,255,255,0.6);}
+.comment-input-area input:last-child{flex:1;padding:5px;font-size:0.6rem;border-radius:12px;border:1px solid rgba(255,181,181,0.5);background: rgba(255,255,255,0.6);}
+.comment-input-area button{width:auto;padding:4px 10px;font-size:0.6rem;background: rgba(255,159,159,0.8);border:none;border-radius:20px;cursor:pointer;}
+.footer{text-align:center;color:#FF9F9F;margin-top:40px;padding-top:20px;border-top:1px solid rgba(255,181,181,0.3);font-size:0.7rem;}
+.empty-feed{text-align:center;padding:60px 20px;color:rgba(42,42,42,0.5);background:rgba(255,255,255,0.2);border-radius:24px;grid-column:1/-1;}
+@media(max-width:900px){.feed-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:550px){.feed-grid{grid-template-columns:1fr;}.name-row{flex-direction:column;gap:0;}.name-row input{margin-bottom:15px;}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>◈ CHECK-IN ◈</h1>
+<div class="subtitle">✦ share what you cooked today ✦</div>
+<div class="post-form">
+<div class="name-row">
+<input id="postName" placeholder="你的名字" type="text">
+<input id="postTitle" placeholder="菜名 / 食谱名" type="text">
+</div>
+<textarea id="postContent" placeholder="描述一下你的作品..." rows="2" spellcheck="false"></textarea>
+<label class="file-label" for="postImage">📷 点击上传照片</label>
+<input accept="image/*" id="postImage" type="file">
+<button class="publish-btn" onclick="createPost()">✨ 发布作品</button>
+</div>
+
+<div class="feed-grid" id="feed">
+<div class="empty-feed">✨ 还没有帖子，成为第一个分享的人吧 ✨</div>
+</div>
+
+<div style="text-align:center;margin-top:40px;">
+<a href="/" style="font-family:monospace;color:#2A2A2A;text-decoration:none;border:1px solid rgba(255,181,181,0.4);padding:8px 20px;border-radius:30px;">← back to home</a>
+</div>
+<div class="footer">◈ ◈ ◈ every meal is a story ◈ ◈ ◈</div>
+</div>
+
+<script>
+let postsData = [];
+
+function renderFeed() {
+    const feedDiv = document.getElementById('feed');
+    if(postsData.length===0){feedDiv.innerHTML='<div class="empty-feed">✨ 还没有帖子，成为第一个分享的人吧 ✨</div>';return;}
+    feedDiv.innerHTML='';
+    postsData.slice().reverse().forEach(post=>{
+        const card=document.createElement('div');
+        card.className='post-card';
+        card.innerHTML=`
+        <img src="${post.imageData}" class="post-card-image">
+        <div class="post-card-content">
+        <div class="post-card-header">
+        <span class="post-card-name">🍳 ${post.name}</span>
+        <span class="post-card-date">${post.date}</span>
+        </div>
+        <div class="post-card-title">🥘 ${post.title}</div>
+        <div class="post-card-desc">${post.content}</div>
+        <div class="post-card-actions">
+        <button class="like-btn" onclick="toggleLike(${post.id})">❤️ ${post.likes}</button>
+        <button class="comment-btn" onclick="toggleComments(${post.id})">💬 ${post.comments.length}</button>
+        </div>
+        <div class="comment-section" id="comments-${post.id}" style="display:none;">
+        <div class="comment-list" id="comment-list-${post.id}"></div>
+        <div class="comment-input-area">
+        <input type="text" id="comment-name-${post.id}" placeholder="名字">
+        <input type="text" id="comment-text-${post.id}" placeholder="评论...">
+        <button onclick="addComment(${post.id})">发送</button>
+        </div>
+        </div>
+        </div>`;
+        feedDiv.appendChild(card);
+    });
+}
+
+function toggleComments(postId){
+    const div=document.getElementById(`comments-${postId}`);
+    if(div){div.style.display=div.style.display==='none'?'block':'none';}
+}
+
+function addComment(postId){
+    const nameInput=document.getElementById(`comment-name-${postId}`);
+    const textInput=document.getElementById(`comment-text-${postId}`);
+    const name=nameInput.value.trim();
+    const content=textInput.value.trim();
+    if(!name||!content){alert('请填写名字和评论内容');return;}
+    const post=postsData.find(p=>p.id===postId);
+    post.comments.push({name,content});
+    renderFeed();
+}
+
+function toggleLike(postId){
+    const post=postsData.find(p=>p.id===postId);
+    post.likes++;
+    renderFeed();
+}
+
+function createPost(){
+    const name=document.getElementById('postName').value.trim();
+    const title=document.getElementById('postTitle').value.trim();
+    const content=document.getElementById('postContent').value.trim();
+    const imageFile=document.getElementById('postImage').files[0];
+    if(!name||!title){alert('请填写名字和菜名');return;}
+    const id=Date.now();
+    const newPost={id,name,title,content,imageData:'',likes:0,comments:[],'date':new Date().toLocaleDateString()};
+    if(imageFile){
+        const reader=new FileReader();
+        reader.onload=function(e){
+            newPost.imageData=e.target.result;
+            postsData.push(newPost);
+            renderFeed();
+        };
+        reader.readAsDataURL(imageFile);
+    } else{
+        newPost.imageData='https://via.placeholder.com/400x400?text=No+Image';
+        postsData.push(newPost);
+        renderFeed();
+    }
+    document.getElementById('postName').value='';
+    document.getElementById('postTitle').value='';
+    document.getElementById('postContent').value='';
+    document.getElementById('postImage').value='';
+}
+
+renderFeed();
+</script>
+</body>
+</html>
